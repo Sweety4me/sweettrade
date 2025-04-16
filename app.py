@@ -28,6 +28,10 @@ if st.button("Get Signal") and symbol:
             df['SMA_5'] = df['Close'].rolling(window=5).mean()
             df['SMA_20'] = df['Close'].rolling(window=20).mean()
 
+            # Show calculated SMAs for debugging
+            st.write("SMA_5 (5-day):", df['SMA_5'].tail(5))  # Last 5 SMA_5 values
+            st.write("SMA_20 (20-day):", df['SMA_20'].tail(5))  # Last 5 SMA_20 values
+
             # Get the latest row (last trading day)
             latest = df.iloc[-1]
 
@@ -35,7 +39,10 @@ if st.button("Get Signal") and symbol:
             sma_5_latest = latest['SMA_5']
             sma_20_latest = latest['SMA_20']
 
-            # Ensure valid comparison of values
+            # Check if SMA values are valid numbers
+            st.write(f"SMA_5 latest value: {sma_5_latest}")
+            st.write(f"SMA_20 latest value: {sma_20_latest}")
+
             if isinstance(sma_5_latest, (int, float)) and isinstance(sma_20_latest, (int, float)):
                 # Signal Logic based on SMA comparison
                 if sma_5_latest > sma_20_latest:
@@ -48,7 +55,7 @@ if st.button("Get Signal") and symbol:
                     signal = "⚖️ HOLD"
                     st.warning(f"{signal} - No clear trend yet.")
             else:
-                st.error("Unable to compare SMA values. Please check the stock data.")
+                st.error("⚠️ Unable to compare SMA values. Check for missing or incorrect data.")
 
             # Show the latest 5 rows of the data
             st.subheader("📅 Latest Stock Data")
