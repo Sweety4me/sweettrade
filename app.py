@@ -31,21 +31,24 @@ if st.button("Get Signal") and symbol:
             # Get the latest row (last trading day)
             latest = df.iloc[-1]
 
-            # Signal Logic based on SMA comparison
-            # Use the latest values for SMA_5 and SMA_20
+            # Use the latest value of SMA_5 and SMA_20 to compare
             sma_5_latest = latest['SMA_5']
             sma_20_latest = latest['SMA_20']
 
-            # Now compare the values directly (latest values only)
-            if sma_5_latest > sma_20_latest:
-                signal = "📈 BUY Signal"
-                st.success(f"{signal} - Short-term uptrend detected.")
-            elif sma_5_latest < sma_20_latest:
-                signal = "📉 SELL Signal"
-                st.error(f"{signal} - Short-term downtrend detected.")
+            # Ensure valid comparison of values
+            if isinstance(sma_5_latest, (int, float)) and isinstance(sma_20_latest, (int, float)):
+                # Signal Logic based on SMA comparison
+                if sma_5_latest > sma_20_latest:
+                    signal = "📈 BUY Signal"
+                    st.success(f"{signal} - Short-term uptrend detected.")
+                elif sma_5_latest < sma_20_latest:
+                    signal = "📉 SELL Signal"
+                    st.error(f"{signal} - Short-term downtrend detected.")
+                else:
+                    signal = "⚖️ HOLD"
+                    st.warning(f"{signal} - No clear trend yet.")
             else:
-                signal = "⚖️ HOLD"
-                st.warning(f"{signal} - No clear trend yet.")
+                st.error("Unable to compare SMA values. Please check the stock data.")
 
             # Show the latest 5 rows of the data
             st.subheader("📅 Latest Stock Data")
