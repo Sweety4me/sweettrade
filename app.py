@@ -32,10 +32,15 @@ if st.button("Get Signal") and symbol:
             latest = df.iloc[-1]
 
             # Signal Logic based on SMA comparison
-            if latest['SMA_5'] > latest['SMA_20']:
+            # Use the latest values for SMA_5 and SMA_20
+            sma_5_latest = latest['SMA_5']
+            sma_20_latest = latest['SMA_20']
+
+            # Now compare the values directly (latest values only)
+            if sma_5_latest > sma_20_latest:
                 signal = "📈 BUY Signal"
                 st.success(f"{signal} - Short-term uptrend detected.")
-            elif latest['SMA_5'] < latest['SMA_20']:
+            elif sma_5_latest < sma_20_latest:
                 signal = "📉 SELL Signal"
                 st.error(f"{signal} - Short-term downtrend detected.")
             else:
