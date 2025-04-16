@@ -1,4 +1,7 @@
-# Use the latest value of SMA_5 and SMA_20 to compare
+# Get the latest row from the stock data
+latest = stock_data.iloc[-1]  # This line should come BEFORE using `latest`
+
+# Extract SMA values as floats
 sma_5_latest = latest['SMA_5'].item() if hasattr(latest['SMA_5'], 'item') else latest['SMA_5']
 sma_20_latest = latest['SMA_20'].item() if hasattr(latest['SMA_20'], 'item') else latest['SMA_20']
 
@@ -6,7 +9,8 @@ sma_20_latest = latest['SMA_20'].item() if hasattr(latest['SMA_20'], 'item') els
 st.write(f"SMA_5 latest value: {sma_5_latest}")
 st.write(f"SMA_20 latest value: {sma_20_latest}")
 
-if isinstance(sma_5_latest, (int, float)):
+# Signal logic
+if isinstance(sma_5_latest, (int, float)) and isinstance(sma_20_latest, (int, float)):
     if sma_5_latest > sma_20_latest:
         signal = "📈 BUY Signal"
         st.success(f"{signal} - Short-term uptrend detected.")
