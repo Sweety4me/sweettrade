@@ -1,24 +1,50 @@
-# Get the latest row from the stock data
-latest = stock_data.iloc[-1]  # This line should come BEFORE using `latest`
+import streamlit as st
+import yfinance as yf
+import pandas as pd
 
-# Extract SMA values as floats
-sma_5_latest = latest['SMA_5'].item() if hasattr(latest['SMA_5'], 'item') else latest['SMA_5']
-sma_20_latest = latest['SMA_20'].item() if hasattr(latest['SMA_20'], 'item') else latest['SMA_20']
+st.title("SweetTrade: Bava's Advanced Trading Tool")
 
-# Debug info
-st.write(f"SMA_5 latest value: {sma_5_latest}")
-st.write(f"SMA_20 latest value: {sma_20_latest}")
+symbol = st.text_input("Enter Stock Symbol (e.g., TATAMOTORS.NS)", "BPCL.NS")
 
-# Signal logic
-if isinstance(sma_5_latest, (int, float)) and isinstance(sma_20_latest, (int, float)):
-    if sma_5_latest > sma_20_latest:
-        signal = "📈 BUY Signal"
-        st.success(f"{signal} - Short-term uptrend detected.")
-    elif sma_5_latest < sma_20_latest:
-        signal = "📉 SELL Signal"
-        st.error(f"{signal} - Short-term downtrend detected.")
-    else:
-        signal = "⚖️ HOLD"
-        st.warning(f"{signal} - No clear trend yet.")
-else:
-    st.error("⚠️ Unable to compare SMA values. Check for missing or incorrect data.")
+if symbol:
+    with st.spinner("📊 Fetching stock data..."):
+        # Download stock data
+        stock_data = yf.download(symbol, period="1mo", interval="1d")
+
+        # Check if data exists
+        if stock_data.empty:
+            st.error("⚠️ No data found for the given symbol.")
+        else:
+            # Calculate moving averages
+            stock_data['SMA_5'] = stock_data['Close'].rolling(window=5).mean()
+            stock_data['SMA_20'] = stock_data['Close'].rolling(window=20).mean()
+
+            # Drop rows with NaN
+            stock_data.dropna(inplace=True)
+
+            # Ensure we have valid data
+            if len(stock_data) < 1:
+                st.error("⚠️ Not enough data to calculate SMAs.")
+            else:
+                # Get the latest row safely
+                latest_row = stock_data.iloc[-1]
+
+                # Extract SMA values
+                sma_5_latest = latest_row['SMA_5']
+                sma_20_latest = latest_row['SMA_20']
+
+                st.write(f"📅 Latest Stock Data")
+                st.write(f"📈 Price & Moving Averages")
+                st.write(f"SMA_5: {sma_5_latest}")
+                st.write(f"SMA_20: {sma_20_latest}")
+
+                # Compare SMAs
+                if pd.notna(sma_5_latest) and pd.notna(sma_20_latest):
+                    if sma_5_latest > sma_20_latest:
+                        st.success("📈 BUY Signal - Short-term uptrend detected.")
+                    elif sma_5_latest < sma_20_latest:
+                        st.error("📉 SELL Signal - Short-term downtrend detected.")
+                    else:
+                        st.warning("⚖️ HOLD - No clear trend.")
+                else:
+                    st.error("⚠️ SMA values are not valid for comparison.")
