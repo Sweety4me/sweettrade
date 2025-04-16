@@ -16,21 +16,22 @@ symbol = st.text_input("Enter Stock Symbol (e.g., TATAMOTORS.NS)")
 if st.button("Get Signal") and symbol:
     st.info("📊 Fetching stock data...")
 
-    # Download 30-day data with 1d interval
     try:
+        # Fetch 30 days of data with 1-day intervals
         df = yf.download(symbol, period="30d", interval="1d")
-
+        
+        # Check if data is empty
         if df.empty:
             st.error("No data found. Please check the symbol and try again.")
         else:
-            # Calculate SMAs
+            # Calculate the Simple Moving Averages (SMA)
             df['SMA_5'] = df['Close'].rolling(window=5).mean()
             df['SMA_20'] = df['Close'].rolling(window=20).mean()
 
-            # Take last row for signal
+            # Get the latest row (last trading day)
             latest = df.iloc[-1]
 
-            # Signal Logic
+            # Signal Logic based on SMA comparison
             if latest['SMA_5'] > latest['SMA_20']:
                 signal = "📈 BUY Signal"
                 st.success(f"{signal} - Short-term uptrend detected.")
@@ -41,11 +42,11 @@ if st.button("Get Signal") and symbol:
                 signal = "⚖️ HOLD"
                 st.warning(f"{signal} - No clear trend yet.")
 
-            # Show last 5 rows
+            # Show the latest 5 rows of the data
             st.subheader("📅 Latest Stock Data")
             st.dataframe(df.tail(5))
 
-            # Plot chart
+            # Plot Close Price and SMAs
             st.subheader("📈 Price & Moving Averages")
             fig, ax = plt.subplots()
             df[['Close', 'SMA_5', 'SMA_20']].plot(ax=ax, linewidth=2)
@@ -55,4 +56,4 @@ if st.button("Get Signal") and symbol:
             st.pyplot(fig)
 
     except Exception as e:
-        st.exception(f"⚠️ Error fetching data: {e}")
+        st.exception(f"⚠️ Error: {e}")  # Displaying the actual error message
